@@ -22,6 +22,12 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("ciclo-select").addEventListener("change", actualizarCascadaFormulario);
     document.getElementById("competencia-select").addEventListener("change", actualizarCascadaFormulario);
     document.getElementById("bloom-select").addEventListener("change", actualizarTextoVerbos);
+    
+    // UX: Si el usuario escribe directamente en el cuadro, actualizamos el estado visual al instante
+    document.getElementById("api-key-input").addEventListener("input", () => {
+        const key = document.getElementById("api-key-input").value.trim();
+        marcarEstadoKey(key.length > 0);
+    });
 });
 
 // FUNCION MODULAR: Lee el archivo JSON
@@ -87,13 +93,13 @@ function actualizarTextoVerbos() {
     document.getElementById("verbos-sugeridos").innerText = "Verbos CC.SS: " + dbBloomLocal[bloomKey];
 }
 
-// CONTROL DE LA API KEY LOCAL
+// CONTROL DE LA API KEY LOCAL (AHORA AUTOMÁTICO Y SILENCIOSO)
 function guardarKey() {
     const key = document.getElementById("api-key-input").value.trim();
     if (key) {
         localStorage.setItem("key_modular_ccss", key);
         marcarEstadoKey(true);
-        alert("API Key almacenada de forma segura en tu navegador.");
+        alert("API Key almacenada manualmente con éxito.");
     }
 }
 function borrarKey() {
@@ -113,18 +119,28 @@ function recuperarApiKeyLocal() {
 function marcarEstadoKey(existe) {
     const el = document.getElementById("key-status");
     if (existe) {
-        el.innerHTML = `<i class="fa-solid fa-circle-check text-green-500"></i> Key conectada`;
+        el.innerHTML = `<i class="fa-solid fa-circle-check text-green-500"></i> Key conectada y lista`;
         el.className = "text-[11px] font-medium text-green-600 mt-2 flex items-center gap-1";
     } else {
-        el.innerHTML = `<i class="fa-solid fa-circle-exclamation text-amber-500"></i> Requiere API Key`;
+        el.innerHTML = `<i class="fa-solid fa-circle-exclamation text-amber-500"></i> En espera de API Key...`;
         el.className = "text-[11px] font-medium text-amber-600 mt-2 flex items-center gap-1";
     }
 }
 
 // PROCESAMIENTO CON LA IA Y LLENADO DE MATRICES
 async function ejecutarPlanificacionConIA() {
-    const apiKey = localStorage.getItem("key_modular_ccss");
-    if (!apiKey) { alert("Por favor, guarda tu API Key de Gemini primero."); return; }
+    // UX FIX: Leemos la clave DIRECTAMENTE desde el cuadro de texto de la pantalla
+    const apiKey = document.getElementById("api-key-input").value.trim();
+    
+    if (!apiKey) { 
+        alert("Por favor, introduce tu API Key de Gemini en el cuadro de texto izquierdo."); 
+        document.getElementById("api-key-input").focus();
+        return; 
+    }
+
+    // AUTO-GUARDADO SILENCIOSO: La guardamos en el navegador para la próxima vez que abra la página
+    localStorage.setItem("key_modular_ccss", apiKey);
+    marcarEstadoKey(true);
 
     const tema = document.getElementById("tema-input").value.trim();
     if (!tema) { alert("Por favor, introduce el tema específico de la clase."); return; }
@@ -168,7 +184,6 @@ Debes responder ÚNICAMENTE con un objeto JSON plano, sin usar marcas markdown d
 - Complejidad Cognitiva Requerida: Nivel ${bloom}`;
 
     try {
-        // Cambiado a gemini-1.5-flash para máxima estabilidad en peticiones pesadas
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -181,25 +196,22 @@ Debes responder ÚNICAMENTE con un objeto JSON plano, sin usar marcas markdown d
 
         const data = await response.json();
         
-        // ESCUDO DE CONTROL: Validamos si la estructura de candidatos existe antes de intentar leerla
         if (!data.candidates || !data.candidates[0] || !data.candidates[0].content.parts[0].text) {
             throw new Error("La IA no devolvió el formato esperado. Inténtalo de nuevo.");
         }
 
         let textoRespuesta = data.candidates[0].content.parts[0].text;
-        
-        // Limpieza preventiva de etiquetas markdown
         textoRespuesta = textoRespuesta.replace(/^```json/i, "").replace(/```$/i, "").trim();
         
         const respuestaIA = JSON.parse(textoRespuesta);
 
-        // INYECCIÓN CONTROLADA EN LAS CELDAS DE LA INTERFAZ (UX SKELETON)
+        // INYECCIÓN DINÁMICA POR CELDA
         document.getElementById("doc-tema-display").innerText = "Tema de la Sesión: " + tema;
         document.getElementById("cell-competencia").innerText = compData.nombre;
         document.getElementById("cell-capacidades").innerHTML = compData.capacidades.join("<br>");
         document.getElementById("cell-desempeno-precisado").innerText = respuestaIA.desempenoPrecisado;
         document.getElementById("cell-enfoque").innerText = enfData.nombre;
-        document.getElementById("cell-actitudes").innerText = enfData.valores_actitudes;
+        document.getElementById("cell-actitudes").innerText = respuestaIA.actitudes || enfData.valores_actitudes;
 
         document.getElementById("cell-estrategias-inicio").innerText = respuestaIA.estrategiasInicio;
         document.getElementById("cell-recursos-inicio").innerText = respuestaIA.recursosInicio;
@@ -218,9 +230,8 @@ Debes responder ÚNICAMENTE con un objeto JSON plano, sin usar marcas markdown d
 
     } catch (error) {
         console.error(error);
-        alert("Aviso de servicio: Los servidores de Google Gemini están experimentando alta demanda o tu clave es incorrecta. Por favor, reasigna tu API Key o vuelve a presionar el botón en unos segundos.");
+        alert("Aviso de servicio: Los servidores de Google Gemini están experimentando alta demanda o la clave es incorrecta. Vuelve a presionar el botón en unos segundos.");
     } finally {
-        // Quitar capa de carga pase lo que pase
         document.getElementById("loading-overlay").classList.add("hidden");
         document.getElementById("loading-overlay").classList.remove("flex");
     }
