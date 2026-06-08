@@ -1,7 +1,7 @@
 // Variable global para retener la base de datos curricular una vez leída
 let dbPlanificadorCCSS = null;
 
-// Configuración local de los verbos de Bloom para no ensuciar el JSON externo
+// Configuración de los verbos de Bloom para la interfaz
 const dbBloomLocal = {
     "Recordar": "Identificar, listar, nombrar, localizar, reconocer.",
     "Comprender": "Explicar, describir, clasificar, resumir, ilustrar.",
@@ -24,20 +24,18 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("bloom-select").addEventListener("change", actualizarTextoVerbos);
 });
 
-// FUNCION CORE: Lee el archivo modular sectorizado
+// FUNCION MODULAR: Lee el archivo JSON
 async function cargarArchivoJsonCurricular() {
     try {
         const respuesta = await fetch('./ccss_secundaria.json');
         if (!respuesta.ok) {
-            throw new Error("No se pudo leer el archivo ccss_secundaria.json de la carpeta.");
+            throw new Error("No se pudo leer el archivo ccss_secundaria.json");
         }
         dbPlanificadorCCSS = await respuesta.json();
-        
-        // Inicializar los menús de la pantalla con los datos recién leídos
         poblarDesplegablesIniciales();
     } catch (error) {
         console.error(error);
-        alert("Error crítico: Verifica que 'ccss_secundaria.json' esté en la misma carpeta que este archivo.");
+        alert("Error crítico: Verifica que 'ccss_secundaria.json' esté subido en tu repositorio de GitHub.");
     }
 }
 
@@ -66,14 +64,14 @@ function actualizarCascadaFormulario() {
     const ciclo = document.getElementById("ciclo-select").value;
     const compData = dbPlanificadorCCSS.competencias_completas_ccss.find(c => c.codigo === codigoComp);
 
-    // Actualizar Capacidades en la UX
+    // Actualizar Capacidades
     const capContainer = document.getElementById("capacidades-container");
     capContainer.innerHTML = "";
     compData.capacidades.forEach(cap => {
         capContainer.innerHTML += `<div class="text-[11px] text-slate-600 font-medium">• ${cap}</div>`;
     });
 
-    // Actualizar Desempeños según Ciclo
+    // Actualizar Desempeños
     const selectDes = document.getElementById("desempeno-select");
     selectDes.innerHTML = "";
     compData.desempenos_oficiales[ciclo].forEach((des, i) => {
@@ -86,16 +84,16 @@ function actualizarCascadaFormulario() {
 
 function actualizarTextoVerbos() {
     const bloomKey = document.getElementById("bloom-select").value;
-    document.getElementById("verbos-sugeridos").innerText = "Verbos Bloom: " + dbBloomLocal[bloomKey];
+    document.getElementById("verbos-sugeridos").innerText = "Verbos CC.SS: " + dbBloomLocal[bloomKey];
 }
 
-// CONTROL DE SEGURIDAD DE LA API KEY LOCAL
+// CONTROL DE LA API KEY LOCAL
 function guardarKey() {
     const key = document.getElementById("api-key-input").value.trim();
     if (key) {
         localStorage.setItem("key_modular_ccss", key);
         marcarEstadoKey(true);
-        alert("API Key almacenada localmente.");
+        alert("API Key almacenada de forma segura en tu navegador.");
     }
 }
 function borrarKey() {
@@ -123,17 +121,13 @@ function marcarEstadoKey(existe) {
     }
 }
 
-// CONEXIÓN INTEGRAL CON LA IA DE GOOGLE
-async function generarSesionConIA() {
-    // Esta función se activa al procesar el Prompt y es manejada abajo por ejecutarPlanificacionConIA
-}
-
+// PROCESAMIENTO CON LA IA Y LLENADO DE MATRICES
 async function ejecutarPlanificacionConIA() {
     const apiKey = localStorage.getItem("key_modular_ccss");
-    if (!apiKey) { alert("Por favor, guarda tu API Key primero."); return; }
+    if (!apiKey) { alert("Por favor, guarda tu API Key de Gemini primero."); return; }
 
     const tema = document.getElementById("tema-input").value.trim();
-    if (!tema) { alert("Por favor, introduce el tema de la sesión."); return; }
+    if (!tema) { alert("Por favor, introduce el tema específico de la clase."); return; }
 
     // Activar animación de carga UX
     document.getElementById("loading-overlay").classList.remove("hidden");
@@ -174,27 +168,38 @@ Debes responder ÚNICAMENTE con un objeto JSON plano, sin usar marcas markdown d
 - Complejidad Cognitiva Requerida: Nivel ${bloom}`;
 
     try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+        // Cambiado a gemini-1.5-flash para máxima estabilidad en peticiones pesadas
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ contents: [{ parts: [{ text: promptFinal }] }] })
         });
 
+        if (!response.ok) {
+            throw new Error(`Google API devolvió un estado de error: ${response.status}`);
+        }
+
         const data = await response.json();
+        
+        // ESCUDO DE CONTROL: Validamos si la estructura de candidatos existe antes de intentar leerla
+        if (!data.candidates || !data.candidates[0] || !data.candidates[0].content.parts[0].text) {
+            throw new Error("La IA no devolvió el formato esperado. Inténtalo de nuevo.");
+        }
+
         let textoRespuesta = data.candidates[0].content.parts[0].text;
         
-        // Limpieza de seguridad por si acaso
+        // Limpieza preventiva de etiquetas markdown
         textoRespuesta = textoRespuesta.replace(/^```json/i, "").replace(/```$/i, "").trim();
         
         const respuestaIA = JSON.parse(textoRespuesta);
 
-        // INYECCIÓN DINÁMICA POR CELDA SIN DEFORMAR LA UX DE LAS TABLAS
+        // INYECCIÓN CONTROLADA EN LAS CELDAS DE LA INTERFAZ (UX SKELETON)
         document.getElementById("doc-tema-display").innerText = "Tema de la Sesión: " + tema;
         document.getElementById("cell-competencia").innerText = compData.nombre;
         document.getElementById("cell-capacidades").innerHTML = compData.capacidades.join("<br>");
         document.getElementById("cell-desempeno-precisado").innerText = respuestaIA.desempenoPrecisado;
         document.getElementById("cell-enfoque").innerText = enfData.nombre;
-        document.getElementById("cell-actitudes").innerText = enfData.valores_actitudes.map ? enfData.valores_actitudes.map(v => `${v.valor}: ${v.actitud}`).join(" | ") : enfData.valores_actitudes;
+        document.getElementById("cell-actitudes").innerText = enfData.valores_actitudes;
 
         document.getElementById("cell-estrategias-inicio").innerText = respuestaIA.estrategiasInicio;
         document.getElementById("cell-recursos-inicio").innerText = respuestaIA.recursosInicio;
@@ -213,9 +218,9 @@ Debes responder ÚNICAMENTE con un objeto JSON plano, sin usar marcas markdown d
 
     } catch (error) {
         console.error(error);
-        alert("Error de sincronización con Gemini o de lectura del objeto de respuesta. Revisa tu consola.");
+        alert("Aviso de servicio: Los servidores de Google Gemini están experimentando alta demanda o tu clave es incorrecta. Por favor, reasigna tu API Key o vuelve a presionar el botón en unos segundos.");
     } finally {
-        // Ocultar overlay de carga
+        // Quitar capa de carga pase lo que pase
         document.getElementById("loading-overlay").classList.add("hidden");
         document.getElementById("loading-overlay").classList.remove("flex");
     }
