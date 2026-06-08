@@ -1,0 +1,171 @@
+{
+  "meta_curriculo": {
+    "pais": "Perú",
+    "nivel": "Secundaria",
+    "area": "Ciencias Sociales",
+    "enfoque_area": "Ciudadanía activa y histórico-crítico"
+  },
+  "enfoques_transversales_oficiales": [
+    {
+      "nombre": "Enfoque de Derechos",
+      "valores_actitudes": [
+        {"valor": "Conciencia de derechos", "actitud": "Disposición a conocer, reconocer y valorar los derechos individuales y colectivos que tenemos las personas en el ámbito privado y público."},
+        {"valor": "Libertad y responsabilidad", "actitud": "Disposición a elegir de manera voluntaria y responsable la propia forma de actuar dentro de una sociedad."},
+        {"valor": "Diálogo y concertación", "actitud": "Disposición a conversar con otras personas, intercambiando ideas o afectos de modo alternativo para construir juntos una postura común."}
+      ]
+    },
+    {
+      "nombre": "Enfoque Inclusivo o de Atención a la Diversidad",
+      "valores_actitudes": [
+        {"valor": "Respeto por las diferencias", "actitud": "Reconocimiento al valor inherente de cada persona y de sus derechos, por encima de cualquier diferencia."},
+        {"valor": "Equidad en la enseñanza", "actitud": "Disposición a enseñar ofreciendo a los estudiantes las condiciones y oportunidades que cada uno necesita para lograr los mismos resultados."},
+        {"valor": "Confianza en la persona", "actitud": "Disposición a depositar expectativas en una persona, creyendo sinceramente en su capacidad de superación y crecimiento por sobre cualquier circunstancia."}
+      ]
+    },
+    {
+      "nombre": "Enfoque Intercultural",
+      "valores_actitudes": [
+        {"valor": "Respeto a la identidad cultural", "actitud": "Reconocimiento al valor de las diversas identidades culturales y relaciones de pertenencia de los estudiantes."},
+        {"valor": "Justicia", "actitud": "Disposición a actuar de manera justa, respetando el derecho de todos, exigiendo la propia responsabilidad y reconociendo derechos a quienes les corresponde."},
+        {"valor": "Diálogo intercultural", "actitud": "Fomento de una interacción equitativa entre diversas culturas, mediante el diálogo y el respeto mutuo."}
+      ]
+    },
+    {
+      "nombre": "Enfoque Igualdad de Género",
+      "valores_actitudes": [
+        {"valor": "Igualdad y Dignidad", "actitud": "Reconocimiento al valor inherente de cada persona, por encima de cualquier diferencia de género."},
+        {"valor": "Justicia", "actitud": "Disposición a actuar de modo que se dé a cada quien lo que le corresponde, en especial a quienes se encuentran en situación de desventaja por razones de género."},
+        {"valor": "Empatía", "actitud": "Transformar las relaciones de género a través del reconocimiento del valor de las experiencias y emociones del otro sexo."}
+      ]
+    },
+    {
+      "nombre": "Enfoque Ambiental",
+      "valores_actitudes": [
+        {"valor": "Solidaridad planetaria y equidad intergeneracional", "actitud": "Disposición para colaborar con el bienestar y la calidad de vida de las generaciones presentes y futuras, así como con la naturaleza."},
+        {"valor": "Justicia y solidaridad", "actitud": "Disposición a evaluar los impactos y costos ambientales de las acciones y actividades cotidianas, y a actuar en beneficio de todas las personas."},
+        {"valor": "Respeto a toda forma de vida", "actitud": "Disposición a valorar y proteger los bienes comunes y compartidos de un grupo social o comunidad."}
+      ]
+    },
+    {
+      "nombre": "Enfoque Orientación al Bien Común",
+      "valores_actitudes": [
+        {"valor": "Equidad y justicia", "actitud": "Disposición a reconocer a que ante situaciones de inequidad, se deben brindar oportunidades diferenciadas para compensar las brechas."},
+        {"valor": "Solidaridad", "actitud": "Disposición a apoyar incondicionalmente a personas en situaciones comprometidas o difíciles."},
+        {"valor": "Empatía", "actitud": "Identificación afectiva con los sentimientos del otro y disposición para apoyar y comprender sus circunstancias."},
+        {"valor": "Responsabilidad", "actitud": "Disposición a valorar y proteger los bienes comunes y compartidos de un grupo social."}
+      ]
+    },
+    {
+      "nombre": "Enfoque Búsqueda de la Excelencia",
+      "valores_actitudes": [
+        {"valor": "Flexibilidad y apertura", "actitud": "Disposición para adaptarse a los cambios, modificando si fuera necesario la propia conducta para alcanzar determinados objetivos."},
+        {"valor": "Superación personal", "actitud": "Disposición a adquirir cualidades que mejorarán el propio desempeño y aumentarán el estado de satisfacción consigo mismo."}
+      ]
+    }
+  ],
+  "catalogo_instrumentos_evaluacion": [
+    {
+      "tipo": "Rúbrica Analítica",
+      "uso_pedagogico": "Para evaluar productos complejos desglosados en niveles de logro (Inicio, Proceso, Logrado, Destacado) con criterios específicos basados en el desempeño."
+    },
+    {
+      "tipo": "Rúbrica Holística",
+      "uso_pedagogico": "Para valorar la producción final del estudiante de manera global, integrando todas las capacidades de la competencia sin puntuar cada criterio por separado."
+    },
+    {
+      "tipo": "Lista de Cotejo",
+      "uso_pedagogico": "Para verificar de forma binaria (Sí / No) la presencia o ausencia de características de la evidencia o indicadores del desempeño precisado."
+    },
+    {
+      "tipo": "Escala de Estimación / Ficha de Observación",
+      "uso_pedagogico": "Para medir la frecuencia o intensidad con la que el estudiante ejecuta los procesos didácticos de Ciencias Sociales en el aula."
+    },
+    {
+      "tipo": "Ficha de Autoevaluación",
+      "uso_pedagogico": "Instrumento de metacognición donde el propio estudiante reflexiona sobre el desarrollo de sus capacidades durante la secuencia didáctica."
+    },
+    {
+      "tipo": "Guía de Debate",
+      "uso_pedagogico": "Para evaluar la argumentación crítica, el uso de fuentes fiables y la toma de postura ética de los estudiantes durante la problematización en clase."
+    }
+  ],
+  "procesos_pedagogicos_y_didacticos": {
+    "procesos_pedagogicos_sesion": [
+      {"nombre": "Problematización", "descripcion": "Planteamiento de la situación significativa, contradicción o reto cognitivo que moviliza al estudiante."},
+      {"nombre": "Propósito y organización", "descripcion": "Comunicación clara de los aprendizajes esperados, competencias, actividades y los criterios bajo los cuales serán evaluados."},
+      {"nombre": "Motivación/Interés/Incentivo", "descripcion": "Estrategias continuas para despertar y sostener la curiosidad e interés de los estudiantes en la temática."},
+      {"nombre": "Saberes previos", "descripcion": "Recuperación de los conocimientos, preconcepciones o vivencias acumuladas por el alumno respecto al tema."},
+      {"nombre": "Gestión y acompañamiento del desarrollo de las competencias", "descripcion": "El núcleo de la sesión donde se ejecutan los procesos didácticos específicos del área."},
+      {"nombre": "Evaluación", "descripcion": "Proceso formativo transversal para verificar logros de aprendizaje, retroalimentar y promover la metacognición."}
+    ],
+    "procesos_didacticos_especificos_ccss": [
+      {"nombre": "Problematización", "enfoque": "Plantear preguntas críticas, dilemas éticos o contradicciones de la realidad histórica, geográfica o económica."},
+      {"nombre": "Análisis de información", "enfoque": "Manejo crítico de fuentes primarias y secundarias, análisis cartográfico, lectura de indicadores macroeconómicos o ambientales."},
+      {"nombre": "Toma de decisiones / Acuerdo", "enfoque": "Asumir una postura argumentada, formular alternativas de solución viables, plantear compromisos ciudadanos o de gestión sostenible."}
+    ]
+  },
+  "competencias_completas_ccss": [
+    {
+      "codigo": "COMP_01",
+      "nombre": "Construye interpretaciones históricas",
+      "capacidades": [
+        "Interpreta críticamente fuentes diversas.",
+        "Comprende el tiempo histórico.",
+        "Elabora explicaciones sobre procesos históricos."
+      ],
+      "desempenos_oficiales": {
+        "VI": [
+          "Utiliza fuentes históricas para obtener información sobre un hecho o proceso histórico, desde el origen de la humanidad hasta las civilizaciones del mundo clásico y la caída del Imperio Romano de Occidente.",
+          "Clasifica las causas y consecuencias de los hechos o procesos históricos desde los primeros pobladores hasta la caída del Tahuantinsuyo, para establecer nexos entre ellos.",
+          "Explica hechos o procesos históricos desde las invasiones bárbaras hasta la expansión europea, a partir de la clasificación de sus causas y consecuencias, reconociendo sus simultaneidades."
+        ],
+        "VII": [
+          "Utiliza constantemente una diversidad de fuentes históricas para indagar sobre un hecho o proceso histórico complejo de los siglos XX y XXI, evaluando la utilidad y confiabilidad de estas fuentes.",
+          "Explica los cambios y permanencias, así como las simultaneidades producidas en los grandes procesos históricos mundiales y peruanos del siglo XIX y XX, usando conceptos históricos abstractos.",
+          "Plantea hipótesis y formula explicaciones sobre procesos históricos peruanos y mundiales (desde el Virreinato hasta la República Temprana) sustentando su postura en múltiples causas y consecuencias."
+        ]
+      }
+    },
+    {
+      "codigo": "COMP_02",
+      "nombre": "Gestiona responsablemente el espacio y el ambiente",
+      "capacidades": [
+        "Comprende las relaciones entre los elementos naturales y sociales.",
+        "Maneja fuentes de información para comprender el espacio geográfico y el ambiente.",
+        "Genera acciones para preservar el ambiente local y global."
+      ],
+      "desempenos_oficiales": {
+        "VI": [
+          "Explica los cambios y permanencias en el espacio geográfico a escala local, nacional y mundial utilizando fuentes cartográficas y estadísticas.",
+          "Utiliza herramientas cartográficas y digitales para ubicar elementos naturales y sociales presentes en los espacios geográficos de su localidad y región.",
+          "Propone acciones orientadas al cuidado de su espacio manifestando situaciones de vulnerabilidad y riesgo ante desastres de origen natural o social."
+        ],
+        "VII": [
+          "Explica las razones por las que se producen las problemáticas ambientales y territoriales (como la deforestación, la minería ilegal, el cambio climático o el crecimiento urbano desordenado) y su impacto en las condiciones de vida de la población.",
+          "Utiliza mapas a diferentes escalas, fotografías aéreas, imágenes satelitales y herramientas estadísticas para analizar la organización y las dinámicas del espacio geográfico.",
+          "Propone y promueve alternativas viables e institucionales para la mitigación y adaptación frente al cambio climático y para la gestión de riesgos de desastres en su comunidad."
+        ]
+      }
+    },
+    {
+      "codigo": "COMP_03",
+      "nombre": "Gestiona responsablemente los recursos económicos",
+      "capacidades": [
+        "Comprende las relaciones entre los elementos del sistema económico y financiero.",
+        "Toma decisiones económicas y financieras."
+      ],
+      "desempenos_oficiales": {
+        "VI": [
+          "Explica los roles de los distintos agentes económicos (familias, empresas, Estado) en el mercado local y nacional, reconociendo que los recursos son escasos.",
+          "Promueve el consumo responsable y el ahorro familiar informándose sobre los derechos del consumidor ante la publicidad, el mercado informal y la evasión tributaria.",
+          "Propone alternativas de inversión o emprendimiento viables utilizando de manera eficiente los recursos financieros y los bienes comunes."
+        ],
+        "VII": [
+          "Analiza de manera crítica el impacto de las políticas económicas, la inflación, la globalización y las crisis financieras internacionales en la economía nacional y familiar.",
+          "Sustenta una posición crítica frente a las prácticas económicas e informales e ilegales que afectan el bienestar del país (monopolios, contrabando, tala ilegal, etc.).",
+          "Propone y ejecuta planes de acción financiera y de emprendimiento evaluando costos de oportunidad, presupuestos complejos, riesgos financieros y sostenibilidad ambiental."
+        ]
+      }
+    }
+  ]
+}
