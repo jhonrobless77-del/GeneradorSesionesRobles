@@ -32,8 +32,8 @@
                 <input type="password" id="api-key-input" placeholder="Pega tu API Key aquí..." 
                        class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2">
                 <div class="flex gap-2">
-                    <button onclick="guardarKey()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-semibold py-2 px-3 rounded-md transition">Guardar Clave</button>
-                    <button onclick="borrarKey()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-[11px] font-semibold py-2 px-3 rounded-md transition">Borrar</button>
+                    <button id="btn-guardar" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-semibold py-2 px-3 rounded-md transition">Guardar Clave</button>
+                    <button id="btn-borrar" class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-[11px] font-semibold py-2 px-3 rounded-md transition">Borrar</button>
                 </div>
                 <p id="key-status" class="text-[11px] font-medium text-amber-600 mt-2 flex items-center gap-1">
                     <i class="fa-solid fa-circle-exclamation"></i> Estado de la clave
@@ -93,8 +93,8 @@
                 </div>
 
                 <button id="btn-generar" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-xl shadow transition duration-200 flex items-center justify-center gap-2 text-xs">
-    <i class="fa-solid fa-wand-magic-sparkles"></i> Ejecutar Alineación de Cuadros
-</button>
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Ejecutar Alineación de Cuadros
+                </button>
             </div>
         </section>
 
@@ -221,13 +221,6 @@
         </section>
     </main>
 
-    <script type="importmap">
-      {
-        "imports": {
-          "@google/generative-ai": "https://esm.run/@google/generative-ai"
-        }
-      }
-    </script>
     <script type="module" src="app.js"></script>
 </body>
 </html>
