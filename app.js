@@ -1,5 +1,5 @@
-// 1. Importar el SDK oficial de Google Generative AI
-import { GoogleGenerativeAI } from "@google/generative-ai";
+// 1. Importación DIRECTA y robusta del SDK oficial (Sin depender de importmap)
+import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
 
 let dbPlanificadorCCSS = null;
 
@@ -12,33 +12,34 @@ const dbBloomLocal = {
     "Crear": "Diseñar, proponer, formular, elaborar, producir."
 };
 
-// 2. INICIALIZACIÓN DEL MÓDULO AL CARGAR LA PÁGINA
-document.addEventListener("DOMContentLoaded", () => {
-    recuperarApiKeyLocal();
-    cargarArchivoJsonCurricular();
-    
-    // Conexión segura de los eventos desde JavaScript (sin usar onclick en HTML)
-    document.getElementById("btn-generar").addEventListener("click", ejecutarPlanificacionConIA);
-    document.getElementById("ciclo-select").addEventListener("change", actualizarCascadaFormulario);
-    document.getElementById("competencia-select").addEventListener("change", actualizarCascadaFormulario);
-    document.getElementById("bloom-select").addEventListener("change", actualizarTextoVerbos);
-    
-    document.getElementById("api-key-input").addEventListener("input", () => {
-        const key = document.getElementById("api-key-input").value.trim();
-        marcarEstadoKey(key.length > 0);
-    });
+// 2. INICIALIZACIÓN INMEDIATA (Como es un módulo, esto corre apenas la página está lista)
+recuperarApiKeyLocal();
+cargarArchivoJsonCurricular();
+
+// 3. CONEXIÓN DE TODOS LOS BOTONES
+document.getElementById("btn-generar").addEventListener("click", ejecutarPlanificacionConIA);
+document.getElementById("ciclo-select").addEventListener("change", actualizarCascadaFormulario);
+document.getElementById("competencia-select").addEventListener("change", actualizarCascadaFormulario);
+document.getElementById("bloom-select").addEventListener("change", actualizarTextoVerbos);
+
+document.getElementById("btn-guardar").addEventListener("click", guardarKey);
+document.getElementById("btn-borrar").addEventListener("click", borrarKey);
+
+document.getElementById("api-key-input").addEventListener("input", () => {
+    const key = document.getElementById("api-key-input").value.trim();
+    marcarEstadoKey(key.length > 0);
 });
 
-// 3. LECTURA DE BASE DE DATOS (JSON)
+// 4. LECTURA DE BASE DE DATOS (JSON)
 async function cargarArchivoJsonCurricular() {
     try {
-        const respuesta = await fetch('./ccss_secundaria.json');
+        const respuesta = await fetch('ccss_secundaria.json');
         if (!respuesta.ok) throw new Error("No se encontró el archivo ccss_secundaria.json");
         dbPlanificadorCCSS = await respuesta.json();
         poblarDesplegablesIniciales();
     } catch (error) {
         console.error(error);
-        alert("Error de sistema: Verifica que 'ccss_secundaria.json' esté en tu repositorio de GitHub.");
+        alert("Aviso: No se pudo cargar el archivo ccss_secundaria.json. Revisa tu repositorio de GitHub.");
     }
 }
 
@@ -88,7 +89,24 @@ function actualizarTextoVerbos() {
     document.getElementById("verbos-sugeridos").innerText = "Verbos CC.SS: " + dbBloomLocal[bloomKey];
 }
 
-// 4. CONTROL DE API KEY (AUTO-GUARDADO)
+// 5. CONTROL DE API KEY
+function guardarKey() {
+    const key = document.getElementById("api-key-input").value.trim();
+    if (key) {
+        localStorage.setItem("key_modular_ccss", key);
+        marcarEstadoKey(true);
+        alert("API Key conectada exitosamente.");
+    } else {
+        alert("El cuadro está vacío. Pega tu API Key primero.");
+    }
+}
+
+function borrarKey() {
+    localStorage.removeItem("key_modular_ccss");
+    document.getElementById("api-key-input").value = "";
+    marcarEstadoKey(false);
+}
+
 function recuperarApiKeyLocal() {
     const key = localStorage.getItem("key_modular_ccss");
     if (key) {
@@ -98,6 +116,7 @@ function recuperarApiKeyLocal() {
         marcarEstadoKey(false);
     }
 }
+
 function marcarEstadoKey(existe) {
     const el = document.getElementById("key-status");
     if (el) {
@@ -111,11 +130,11 @@ function marcarEstadoKey(existe) {
     }
 }
 
-// 5. MOTOR ROBUSTO DE IA USANDO EL SDK DE GOOGLE
+// 6. MOTOR ROBUSTO DE IA (SDK OFICIAL)
 async function ejecutarPlanificacionConIA() {
     const apiKey = document.getElementById("api-key-input").value.trim();
     if (!apiKey) { 
-        alert("Por favor, ingresa tu API Key."); 
+        alert("Falta la API Key. Por favor pégala en el cuadro de la izquierda."); 
         document.getElementById("api-key-input").focus();
         return; 
     }
@@ -124,7 +143,7 @@ async function ejecutarPlanificacionConIA() {
     marcarEstadoKey(true);
 
     const tema = document.getElementById("tema-input").value.trim();
-    if (!tema) { alert("Escribe el tema de la sesión."); return; }
+    if (!tema) { alert("Debes escribir un tema para la sesión."); return; }
 
     document.getElementById("loading-overlay").classList.remove("hidden");
     document.getElementById("loading-overlay").classList.add("flex");
@@ -163,10 +182,8 @@ Devuelve los datos estructurados exactamente con estas llaves:
 }`;
 
     try {
-        // Inicialización segura del SDK Oficial
         const genAI = new GoogleGenerativeAI(apiKey);
         
-        // Configuramos el modelo blindando el formato de salida a JSON estricto
         const model = genAI.getGenerativeModel({ 
             model: "gemini-1.5-flash-latest",
             generationConfig: {
@@ -174,20 +191,15 @@ Devuelve los datos estructurados exactamente con estas llaves:
             }
         });
 
-        // Llamada limpia y manejada por el SDK
         const result = await model.generateContent(promptFinal);
         const textoRespuesta = result.response.text();
-        
-        // Parseo seguro
         const respuestaIA = JSON.parse(textoRespuesta);
 
-        // Inyección en la Interfaz (UX)
         document.getElementById("doc-tema-display").innerText = "Tema de la Sesión: " + tema;
         document.getElementById("cell-competencia").innerText = compData.nombre;
         document.getElementById("cell-capacidades").innerHTML = compData.capacidades.join("<br>");
         document.getElementById("cell-desempeno-precisado").innerText = respuestaIA.desempenoPrecisado;
         
-        // Manejo de la estructura de actitudes para evitar errores visuales
         document.getElementById("cell-enfoque").innerText = enfData.nombre;
         let actitudesMapeadas = "";
         if (Array.isArray(enfData.valores_actitudes)) {
@@ -212,7 +224,7 @@ Devuelve los datos estructurados exactamente con estas llaves:
 
     } catch (error) {
         console.error("Detalle del error:", error);
-        alert(`Error en el motor de IA: ${error.message}\nVerifica que tu API Key sea correcta o intenta nuevamente.`);
+        alert(`Error en el motor de IA: ${error.message}`);
     } finally {
         document.getElementById("loading-overlay").classList.add("hidden");
         document.getElementById("loading-overlay").classList.remove("flex");
