@@ -43,6 +43,7 @@ async function cargarArchivoJsonCurricular() {
     }
 }
 
+// Rellenar las listas desplegables
 function poblarDesplegablesIniciales() {
     if (!dbPlanificadorCCSS) return;
 
@@ -150,7 +151,7 @@ async function ejecutarPlanificacionConIA() {
 
     const ciclo = document.getElementById("ciclo-select").value;
     const codigoComp = document.getElementById("competencia-select").value;
-    const compData = dbPlanificadorCCSS.competencias_completas_ccss.find(c => c.codigo === codigoComp);
+    const compData = dbPlanificadorCCSS.competencias_complementas_ccss ? dbPlanificadorCCSS.competencias_complementas_ccss.find(c => c.codigo === codigoComp) : dbPlanificadorCCSS.competencias_completas_ccss.find(c => c.codigo === codigoComp);
     const desIndex = document.getElementById("desempeno-select").value;
     const desBase = compData.desempenos_oficiales[ciclo][desIndex];
     const enfIndex = document.getElementById("enfoque-select").value;
@@ -206,7 +207,7 @@ Debes responder ÚNICAMENTE con un objeto JSON plano, sin usar marcas markdown d
         
         const respuestaIA = JSON.parse(textoRespuesta);
 
-        // INYECCIÓN DIRECTA POR CELDA EN LA UX SKELETON
+        // INYECCIÓN DIRECTA POR CELDA
         document.getElementById("doc-tema-display").innerText = "Tema de la Sesión: " + tema;
         document.getElementById("cell-competencia").innerText = compData.nombre;
         document.getElementById("cell-capacidades").innerHTML = compData.capacidades.join("<br>");
