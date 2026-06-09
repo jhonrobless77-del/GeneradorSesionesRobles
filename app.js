@@ -167,7 +167,7 @@ Debes responder ÚNICAMENTE con un objeto JSON plano, sin usar marcas markdown d
   "recursosInicio": "Materiales didácticos de inicio",
   "estrategiasDesarrollo": "Secuencia de los procesos didácticos de Ciencias Sociales: 1) Problematización, 2) Análisis de información (forzando el uso de verbos de acción del nivel de Bloom: ${bloom}) y 3) Toma de decisiones o Acuerdos",
   "recursosDesarrollo": "Fuentes primarias o secundarias, mapas o lecturas especializadas utilizadas",
-  "estrategiasCierre": "Describe las preguntas de metacognición histórica/social y la actividad de extensión",
+  "estrategiasCierre": "Describe las preguntas de metacognición histórica/social y la activity de extensión",
   "recursosCierre": "Ficha de autoevaluación",
   "evaluacionSituacion": "Describe el contexto formativo donde se evaluará al estudiante",
   "evaluacionEvidencia": "Producto tangible o actuación final evaluada",
@@ -183,7 +183,7 @@ Debes responder ÚNICAMENTE con un objeto JSON plano, sin usar marcas markdown d
 - Complejidad Cognitiva Requerida: Nivel ${bloom}`;
 
     try {
-        // ENLACE CORREGIDO: v1beta + gemini-1.5-flash para máxima compatibilidad gratuita
+        // ENDPOINT COMPATIBLE Y SEGURO: v1beta + gemini-1.5-flash
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
