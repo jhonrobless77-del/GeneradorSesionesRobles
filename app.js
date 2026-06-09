@@ -1,49 +1,47 @@
-// Variable global para retener la base de datos curricular una vez leída
+// 1. Importar el SDK oficial de Google Generative AI
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
 let dbPlanificadorCCSS = null;
 
-// Configuración de los verbos de Bloom para la interfaz
 const dbBloomLocal = {
     "Recordar": "Identificar, listar, nombrar, localizar, reconocer.",
     "Comprender": "Explicar, describir, clasificar, resumir, ilustrar.",
     "Aplicar": "Emplear, utilizar, calcular, resolver, trazar.",
     "Analizar": "Comparar, contrastar, diferenciar, analizar, debatir.",
-    "Evaluar": "Justificar, defender, evaluar, defender, criticar.",
+    "Evaluar": "Justificar, defender, evaluar, criticar.",
     "Crear": "Diseñar, proponer, formular, elaborar, producir."
 };
 
-// ASINCRONÍA DE ARRANQUE: Leer el JSON apenas cargue la estructura
-window.addEventListener("load", () => {
+// 2. INICIALIZACIÓN DEL MÓDULO AL CARGAR LA PÁGINA
+document.addEventListener("DOMContentLoaded", () => {
     recuperarApiKeyLocal();
     cargarArchivoJsonCurricular();
     
-    // Escuchar cambios de selectores para actualizar en cascada
+    // Conexión segura de los eventos desde JavaScript (sin usar onclick en HTML)
+    document.getElementById("btn-generar").addEventListener("click", ejecutarPlanificacionConIA);
     document.getElementById("ciclo-select").addEventListener("change", actualizarCascadaFormulario);
     document.getElementById("competencia-select").addEventListener("change", actualizarCascadaFormulario);
     document.getElementById("bloom-select").addEventListener("change", actualizarTextoVerbos);
     
-    // Monitorear ingreso de texto en la Key
     document.getElementById("api-key-input").addEventListener("input", () => {
         const key = document.getElementById("api-key-input").value.trim();
         marcarEstadoKey(key.length > 0);
     });
 });
 
-// LEER EL ARCHIVO JSON MODULAR
+// 3. LECTURA DE BASE DE DATOS (JSON)
 async function cargarArchivoJsonCurricular() {
     try {
         const respuesta = await fetch('./ccss_secundaria.json');
-        if (!respuesta.ok) {
-            throw new Error("No se pudo leer el archivo ccss_secundaria.json");
-        }
+        if (!respuesta.ok) throw new Error("No se encontró el archivo ccss_secundaria.json");
         dbPlanificadorCCSS = await respuesta.json();
         poblarDesplegablesIniciales();
     } catch (error) {
         console.error(error);
-        alert("Error de enlace: El archivo 'ccss_secundaria.json' no se encuentra o está mal escrito en GitHub.");
+        alert("Error de sistema: Verifica que 'ccss_secundaria.json' esté en tu repositorio de GitHub.");
     }
 }
 
-// Rellenar las listas desplegables
 function poblarDesplegablesIniciales() {
     if (!dbPlanificadorCCSS) return;
 
@@ -69,14 +67,12 @@ function actualizarCascadaFormulario() {
     const ciclo = document.getElementById("ciclo-select").value;
     const compData = dbPlanificadorCCSS.competencias_completas_ccss.find(c => c.codigo === codigoComp);
 
-    // Actualizar Capacidades
     const capContainer = document.getElementById("capacidades-container");
     capContainer.innerHTML = "";
     compData.capacidades.forEach(cap => {
         capContainer.innerHTML += `<div class="text-[11px] text-slate-600 font-medium">• ${cap}</div>`;
     });
 
-    // Actualizar Desempeños
     const selectDes = document.getElementById("desempeno-select");
     selectDes.innerHTML = "";
     compData.desempenos_oficiales[ciclo].forEach((des, i) => {
@@ -92,20 +88,7 @@ function actualizarTextoVerbos() {
     document.getElementById("verbos-sugeridos").innerText = "Verbos CC.SS: " + dbBloomLocal[bloomKey];
 }
 
-// MANEJO DE LLAVE LOCAL
-function guardarKey() {
-    const key = document.getElementById("api-key-input").value.trim();
-    if (key) {
-        localStorage.setItem("key_modular_ccss", key);
-        marcarEstadoKey(true);
-        alert("API Key guardada con éxito.");
-    }
-}
-function borrarKey() {
-    localStorage.removeItem("key_modular_ccss");
-    document.getElementById("api-key-input").value = "";
-    marcarEstadoKey(false);
-}
+// 4. CONTROL DE API KEY (AUTO-GUARDADO)
 function recuperarApiKeyLocal() {
     const key = localStorage.getItem("key_modular_ccss");
     if (key) {
@@ -128,99 +111,96 @@ function marcarEstadoKey(existe) {
     }
 }
 
-// CONEXIÓN PRINCIPAL CON LA IA DE GOOGLE GEMINI
+// 5. MOTOR ROBUSTO DE IA USANDO EL SDK DE GOOGLE
 async function ejecutarPlanificacionConIA() {
     const apiKey = document.getElementById("api-key-input").value.trim();
-    
     if (!apiKey) { 
-        alert("Por favor, ingresa tu API Key de Gemini en el cuadro de la izquierda."); 
+        alert("Por favor, ingresa tu API Key."); 
         document.getElementById("api-key-input").focus();
         return; 
     }
 
-    // Guardado automático discreto
     localStorage.setItem("key_modular_ccss", apiKey);
     marcarEstadoKey(true);
 
     const tema = document.getElementById("tema-input").value.trim();
-    if (!tema) { alert("Por favor, escribe el tema específico para la sesión."); return; }
+    if (!tema) { alert("Escribe el tema de la sesión."); return; }
 
-    // Mostrar pantalla de carga
     document.getElementById("loading-overlay").classList.remove("hidden");
     document.getElementById("loading-overlay").classList.add("flex");
 
     const ciclo = document.getElementById("ciclo-select").value;
     const codigoComp = document.getElementById("competencia-select").value;
-    const compData = dbPlanificadorCCSS.competencias_complementas_ccss ? dbPlanificadorCCSS.competencias_complementas_ccss.find(c => c.codigo === codigoComp) : dbPlanificadorCCSS.competencias_completas_ccss.find(c => c.codigo === codigoComp);
+    const compData = dbPlanificadorCCSS.competencias_completas_ccss.find(c => c.codigo === codigoComp);
     const desIndex = document.getElementById("desempeno-select").value;
     const desBase = compData.desempenos_oficiales[ciclo][desIndex];
     const enfIndex = document.getElementById("enfoque-select").value;
     const enfData = dbPlanificadorCCSS.enfoques_transversales_oficiales[enfIndex];
     const bloom = document.getElementById("bloom-select").value;
 
-    const promptFinal = `Actúa como especialista técnico-pedagógico del MINEDU del Perú.
-Diseña los contenidos exactos de la sesión de aprendizaje basándote estrictamente en los datos de entrada provistos.
-Debes responder ÚNICAMENTE con un objeto JSON plano, sin usar marcas markdown de bloque tipo \`\`\`json, sin comentarios. Solo el texto crudo del JSON con estas llaves textuales exactas:
+    const promptFinal = `Eres un especialista pedagógico del MINEDU elaborando una sesión de Ciencias Sociales.
+Basándote en los siguientes datos, genera el contenido para los cuadros de la sesión. 
 
+=== DATOS CURRICULARES ===
+Tema: "${tema}"
+Competencia: "${compData.nombre}"
+Desempeño base: "${desBase}"
+Complejidad Cognitiva: Nivel ${bloom}
+
+=== INSTRUCCIONES DE RESPUESTA JSON ===
+Devuelve los datos estructurados exactamente con estas llaves:
 {
-  "desempenoPrecisado": "Redacta el desempeño oficial provisto pero precisado y adaptado exactamente al tema de la sesión",
-  "estrategiasInicio": "Redacta las actividades docentes y de alumnos para la Problematización, Propósito, Motivación y Saberes previos",
-  "recursosInicio": "Materiales didácticos de inicio",
-  "estrategiasDesarrollo": "Secuencia de los procesos didácticos de Ciencias Sociales: 1) Problematización, 2) Análisis de información (forzando el uso de verbos de acción del nivel de Bloom: ${bloom}) y 3) Toma de decisiones o Acuerdos",
-  "recursosDesarrollo": "Fuentes primarias o secundarias, mapas o lecturas especializadas utilizadas",
-  "estrategiasCierre": "Describe las preguntas de metacognición histórica/social y la actividad de extensión",
-  "recursosCierre": "Ficha de autoevaluación",
-  "evaluacionSituacion": "Describe el contexto formativo donde se evaluará al estudiante",
-  "evaluacionEvidencia": "Producto tangible o actuación final evaluada",
-  "evaluacionInstrumento": "Detalla el instrumento ideal de tu catálogo justificándolo brevemente"
-}
-
-=== DATOS DE ENTRADA CURRICULARES ===
-- Tema: "${tema}"
-- Competencia Social: "${compData.nombre}"
-- Capacidades: "${compData.capacidades.join(", ")}"
-- Desempeño base del CNEB: "${desBase}"
-- Enfoque transversal asignado: "${enfData.nombre}"
-- Complejidad Cognitiva Requerida: Nivel ${bloom}`;
+  "desempenoPrecisado": "Desempeño oficial adaptado al tema",
+  "estrategiasInicio": "Problematización, Propósito, Motivación y Saberes previos",
+  "recursosInicio": "Materiales para el inicio",
+  "estrategiasDesarrollo": "Procesos didácticos: 1) Problematización, 2) Análisis de información (usar verbos de nivel ${bloom}), 3) Toma de decisiones",
+  "recursosDesarrollo": "Fuentes primarias/secundarias o mapas",
+  "estrategiasCierre": "Metacognición y extensión",
+  "recursosCierre": "Material de evaluación",
+  "evaluacionSituacion": "Situación donde se evaluará al estudiante",
+  "evaluacionEvidencia": "Producto tangible",
+  "evaluacionInstrumento": "Instrumento técnico a utilizar"
+}`;
 
     try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ contents: [{ parts: [{ text: promptFinal }] }] })
+        // Inicialización segura del SDK Oficial
+        const genAI = new GoogleGenerativeAI(apiKey);
+        
+        // Configuramos el modelo blindando el formato de salida a JSON estricto
+        const model = genAI.getGenerativeModel({ 
+            model: "gemini-1.5-flash",
+            generationConfig: {
+                responseMimeType: "application/json",
+            }
         });
 
-        if (!response.ok) {
-            const errorBody = await response.json().catch(() => ({}));
-            const mensajeGoogle = errorBody.error?.message || "Error desconocido en el servidor de Google.";
-            throw new Error(`Google API (Status ${response.status}): ${mensajeGoogle}`);
-        }
-
-        const data = await response.json();
+        // Llamada limpia y manejada por el SDK
+        const result = await model.generateContent(promptFinal);
+        const textoRespuesta = result.response.text();
         
-        if (!data.candidates || !data.candidates[0] || !data.candidates[0].content.parts[0].text) {
-            throw new Error("La estructura de respuesta de la IA llegó vacía. Inténtalo de nuevo.");
-        }
-
-        let textoRespuesta = data.candidates[0].content.parts[0].text;
-        textoRespuesta = textoRespuesta.replace(/^```json/i, "").replace(/```$/i, "").trim();
-        
+        // Parseo seguro
         const respuestaIA = JSON.parse(textoRespuesta);
 
-        // INYECCIÓN DIRECTA POR CELDA
+        // Inyección en la Interfaz (UX)
         document.getElementById("doc-tema-display").innerText = "Tema de la Sesión: " + tema;
         document.getElementById("cell-competencia").innerText = compData.nombre;
         document.getElementById("cell-capacidades").innerHTML = compData.capacidades.join("<br>");
         document.getElementById("cell-desempeno-precisado").innerText = respuestaIA.desempenoPrecisado;
+        
+        // Manejo de la estructura de actitudes para evitar errores visuales
         document.getElementById("cell-enfoque").innerText = enfData.nombre;
-        document.getElementById("cell-actitudes").innerText = respuestaIA.actitudes || enfData.valores_actitudes;
+        let actitudesMapeadas = "";
+        if (Array.isArray(enfData.valores_actitudes)) {
+            actitudesMapeadas = enfData.valores_actitudes.map(v => `• ${v.valor}: ${v.actitud}`).join("\n");
+        } else {
+            actitudesMapeadas = enfData.valores_actitudes || "Actitudes asociadas al enfoque.";
+        }
+        document.getElementById("cell-actitudes").innerText = actitudesMapeadas;
 
         document.getElementById("cell-estrategias-inicio").innerText = respuestaIA.estrategiasInicio;
         document.getElementById("cell-recursos-inicio").innerText = respuestaIA.recursosInicio;
-        
         document.getElementById("cell-estrategias-desarrollo").innerText = respuestaIA.estrategiasDesarrollo;
         document.getElementById("cell-recursos-desarrollo").innerText = respuestaIA.recursosDesarrollo;
-        
         document.getElementById("cell-estrategias-cierre").innerText = respuestaIA.estrategiasCierre;
         document.getElementById("cell-recursos-cierre").innerText = respuestaIA.recursosCierre;
 
@@ -231,8 +211,8 @@ Debes responder ÚNICAMENTE con un objeto JSON plano, sin usar marcas markdown d
         document.getElementById("cell-eval-instrumento").innerText = respuestaIA.evaluacionInstrumento;
 
     } catch (error) {
-        console.error(error);
-        alert(`Aviso del Sistema:\n${error.message}`);
+        console.error("Detalle del error:", error);
+        alert(`Error en el motor de IA: ${error.message}\nVerifica que tu API Key sea correcta o intenta nuevamente.`);
     } finally {
         document.getElementById("loading-overlay").classList.add("hidden");
         document.getElementById("loading-overlay").classList.remove("flex");
