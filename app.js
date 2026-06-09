@@ -11,26 +11,24 @@ const dbBloomLocal = {
     "Crear": "Diseñar, proponer, formular, elaborar, producir."
 };
 
-// AL CARGAR LA PÁGINA: LEER EL ARCHIVO JSON EXTERNO
-document.addEventListener("DOMContentLoaded", () => {
+// ASINCRONÍA DE ARRANQUE: Leer el JSON apenas cargue la estructura
+window.addEventListener("load", () => {
     recuperarApiKeyLocal();
     cargarArchivoJsonCurricular();
     
-    // Escuchar el botón generador
-    document.getElementById("btn-generar").addEventListener("click", ejecutarPlanificacionConIA);
-    // Escuchar cambios de selectores para cascada
+    // Escuchar cambios de selectores para actualizar en cascada
     document.getElementById("ciclo-select").addEventListener("change", actualizarCascadaFormulario);
     document.getElementById("competencia-select").addEventListener("change", actualizarCascadaFormulario);
     document.getElementById("bloom-select").addEventListener("change", actualizarTextoVerbos);
     
-    // UX: Si el usuario escribe directamente en el cuadro, actualizamos el estado visual al instante
+    // Monitorear ingreso de texto en la Key
     document.getElementById("api-key-input").addEventListener("input", () => {
         const key = document.getElementById("api-key-input").value.trim();
         marcarEstadoKey(key.length > 0);
     });
 });
 
-// FUNCION MODULAR: Lee el archivo JSON
+// LEER EL ARCHIVO JSON MODULAR
 async function cargarArchivoJsonCurricular() {
     try {
         const respuesta = await fetch('./ccss_secundaria.json');
@@ -41,7 +39,7 @@ async function cargarArchivoJsonCurricular() {
         poblarDesplegablesIniciales();
     } catch (error) {
         console.error(error);
-        alert("Error crítico: Verifica que 'ccss_secundaria.json' esté subido en tu repositorio de GitHub.");
+        alert("Error de enlace: El archivo 'ccss_secundaria.json' no se encuentra o está mal escrito en GitHub.");
     }
 }
 
@@ -93,13 +91,13 @@ function actualizarTextoVerbos() {
     document.getElementById("verbos-sugeridos").innerText = "Verbos CC.SS: " + dbBloomLocal[bloomKey];
 }
 
-// CONTROL DE LA API KEY LOCAL
+// MANEJO DE LLAVE LOCAL
 function guardarKey() {
     const key = document.getElementById("api-key-input").value.trim();
     if (key) {
         localStorage.setItem("key_modular_ccss", key);
         marcarEstadoKey(true);
-        alert("API Key almacenada manualmente con éxito.");
+        alert("API Key guardada con éxito.");
     }
 }
 function borrarKey() {
@@ -118,33 +116,35 @@ function recuperarApiKeyLocal() {
 }
 function marcarEstadoKey(existe) {
     const el = document.getElementById("key-status");
-    if (existe) {
-        el.innerHTML = `<i class="fa-solid fa-circle-check text-green-500"></i> Key conectada y lista`;
-        el.className = "text-[11px] font-medium text-green-600 mt-2 flex items-center gap-1";
-    } else {
-        el.innerHTML = `<i class="fa-solid fa-circle-exclamation text-amber-500"></i> En espera de API Key...`;
-        el.className = "text-[11px] font-medium text-amber-600 mt-2 flex items-center gap-1";
+    if (el) {
+        if (existe) {
+            el.innerHTML = `<i class="fa-solid fa-circle-check text-green-500"></i> Key lista`;
+            el.className = "text-[11px] font-medium text-green-600 mt-2 flex items-center gap-1";
+        } else {
+            el.innerHTML = `<i class="fa-solid fa-circle-exclamation text-amber-500"></i> Esperando Key...`;
+            el.className = "text-[11px] font-medium text-amber-600 mt-2 flex items-center gap-1";
+        }
     }
 }
 
-// PROCESAMIENTO CON LA IA Y LLENADO DE MATRICES
+// CONEXIÓN PRINCIPAL CON LA IA DE GOOGLE GEMINI
 async function ejecutarPlanificacionConIA() {
     const apiKey = document.getElementById("api-key-input").value.trim();
     
     if (!apiKey) { 
-        alert("Por favor, introduce tu API Key de Gemini en el cuadro de texto izquierdo."); 
+        alert("Por favor, ingresa tu API Key de Gemini en el cuadro de la izquierda."); 
         document.getElementById("api-key-input").focus();
         return; 
     }
 
-    // Auto-guardado silencioso
+    // Guardado automático discreto
     localStorage.setItem("key_modular_ccss", apiKey);
     marcarEstadoKey(true);
 
     const tema = document.getElementById("tema-input").value.trim();
-    if (!tema) { alert("Por favor, introduce el tema específico de la clase."); return; }
+    if (!tema) { alert("Por favor, escribe el tema específico para la sesión."); return; }
 
-    // Activar animación de carga UX
+    // Mostrar pantalla de carga
     document.getElementById("loading-overlay").classList.remove("hidden");
     document.getElementById("loading-overlay").classList.add("flex");
 
@@ -167,7 +167,7 @@ Debes responder ÚNICAMENTE con un objeto JSON plano, sin usar marcas markdown d
   "recursosInicio": "Materiales didácticos de inicio",
   "estrategiasDesarrollo": "Secuencia de los procesos didácticos de Ciencias Sociales: 1) Problematización, 2) Análisis de información (forzando el uso de verbos de acción del nivel de Bloom: ${bloom}) y 3) Toma de decisiones o Acuerdos",
   "recursosDesarrollo": "Fuentes primarias o secundarias, mapas o lecturas especializadas utilizadas",
-  "estrategiasCierre": "Describe las preguntas de metacognición histórica/social y la activity de extensión",
+  "estrategiasCierre": "Describe las preguntas de metacognición histórica/social y la actividad de extensión",
   "recursosCierre": "Ficha de autoevaluación",
   "evaluacionSituacion": "Describe el contexto formativo donde se evaluará al estudiante",
   "evaluacionEvidencia": "Producto tangible o actuación final evaluada",
@@ -183,7 +183,6 @@ Debes responder ÚNICAMENTE con un objeto JSON plano, sin usar marcas markdown d
 - Complejidad Cognitiva Requerida: Nivel ${bloom}`;
 
     try {
-        // ENDPOINT COMPATIBLE Y SEGURO: v1beta + gemini-1.5-flash
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -199,7 +198,7 @@ Debes responder ÚNICAMENTE con un objeto JSON plano, sin usar marcas markdown d
         const data = await response.json();
         
         if (!data.candidates || !data.candidates[0] || !data.candidates[0].content.parts[0].text) {
-            throw new Error("La estructura de respuesta de la IA está vacía. Inténtalo de nuevo.");
+            throw new Error("La estructura de respuesta de la IA llegó vacía. Inténtalo de nuevo.");
         }
 
         let textoRespuesta = data.candidates[0].content.parts[0].text;
@@ -207,7 +206,7 @@ Debes responder ÚNICAMENTE con un objeto JSON plano, sin usar marcas markdown d
         
         const respuestaIA = JSON.parse(textoRespuesta);
 
-        // INYECCIÓN DINÁMICA POR CELDA
+        // INYECCIÓN DIRECTA POR CELDA EN LA UX SKELETON
         document.getElementById("doc-tema-display").innerText = "Tema de la Sesión: " + tema;
         document.getElementById("cell-competencia").innerText = compData.nombre;
         document.getElementById("cell-capacidades").innerHTML = compData.capacidades.join("<br>");
