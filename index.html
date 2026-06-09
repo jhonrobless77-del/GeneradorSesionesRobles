@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CC.SS. Planificador Modular - IA</title>
+    <title>CC.SS. Planificador - API Estándar</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -16,7 +16,7 @@
             <div>
                 <span class="bg-blue-500 text-white text-xs font-bold uppercase px-3 py-1 rounded-full">Secundaria</span>
                 <h1 class="text-2xl font-bold mt-1">Planificador de Ciencias Sociales</h1>
-                <p class="text-blue-200 text-xs">Carga modular e inyección dinámica por celdas institucionales</p>
+                <p class="text-blue-200 text-xs">Conexión directa vía API Estándar REST</p>
             </div>
         </div>
     </header>
@@ -24,7 +24,6 @@
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         <section class="lg:col-span-4 space-y-5">
-            
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
                 <h2 class="text-xs font-bold uppercase tracking-wider text-slate-600 mb-3 flex items-center gap-2">
                     <i class="fa-solid fa-key text-blue-600"></i> API Key de Gemini
@@ -103,7 +102,7 @@
                 
                 <div id="loading-overlay" class="hidden absolute inset-0 bg-white/95 z-10 flex-col items-center justify-center text-center rounded-xl">
                     <div class="w-10 h-10 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin mb-3"></div>
-                    <h4 class="font-bold text-slate-700 text-sm">Consultando base curricular...</h4>
+                    <h4 class="font-bold text-slate-700 text-sm">Procesando con API Estándar...</h4>
                     <p class="text-xs text-slate-400">Rellenando celdas sin alterar las tablas.</p>
                 </div>
 
@@ -164,8 +163,8 @@
                             <tbody class="divide-y divide-slate-200">
                                 <tr class="align-top">
                                     <td class="px-3 py-3 font-bold text-center bg-slate-50/50 border-r border-slate-200 text-indigo-950">Inicio</td>
-                                    <td class="px-3 py-3 border-r border-slate-200 leading-relaxed font-medium text-slate-700">Problematización<br>Propósito (de la clase)<br>Motivación/ Interés<br>Saberes Previos</td>
-                                    <td id="cell-estrategias-inicio" class="px-3 py-3 text-slate-400 leading-relaxed whitespace-pre-line border-r border-slate-200">Por rellenar...</td>
+                                    <td class="px-3 py-3 border-r border-slate-200 leading-relaxed font-medium text-slate-700">Problematización<br>Propósito<br>Motivación/ Interés<br>Saberes Previos</td>
+                                    <td id="cell-estrategias-inicio" class="px-3 py-3 text-slate-600 leading-relaxed whitespace-pre-line border-r border-slate-200">Por rellenar...</td>
                                     <td class="px-3 py-3 text-center border-r border-slate-200 font-medium">15 min.</td>
                                     <td id="cell-recursos-inicio" class="px-3 py-3 text-slate-600">---</td>
                                 </tr>
@@ -174,7 +173,7 @@
                                     <td class="px-3 py-3 border-r border-slate-200 font-medium text-slate-700">Gestión y acompañamiento</td>
                                     <td class="px-3 py-3 border-r border-slate-200 space-y-2">
                                         <div class="text-[9px] bg-indigo-900 text-white font-bold px-2 py-0.5 rounded inline-block uppercase tracking-wider">PROCESOS DIDÁCTICOS DEL ÁREA</div>
-                                        <div id="cell-estrategias-desarrollo" class="text-slate-400 leading-relaxed whitespace-pre-line">Por rellenar...</div>
+                                        <div id="cell-estrategias-desarrollo" class="text-slate-600 leading-relaxed whitespace-pre-line">Por rellenar...</div>
                                     </td>
                                     <td class="px-3 py-3 text-center border-r border-slate-200 font-medium">60 min.</td>
                                     <td id="cell-recursos-desarrollo" class="px-3 py-3 text-slate-600">---</td>
@@ -182,7 +181,7 @@
                                 <tr class="align-top">
                                     <td class="px-3 py-3 font-bold text-center bg-slate-50/50 border-r border-slate-200 text-indigo-950">Cierre</td>
                                     <td class="px-3 py-3 border-r border-slate-200 leading-relaxed font-medium text-slate-700">Evaluación<br>Metacognición<br>Extensión</td>
-                                    <td id="cell-estrategias-cierre" class="px-3 py-3 text-slate-400 leading-relaxed whitespace-pre-line border-r border-slate-200">Por rellenar...</td>
+                                    <td id="cell-estrategias-cierre" class="px-3 py-3 text-slate-600 leading-relaxed whitespace-pre-line border-r border-slate-200">Por rellenar...</td>
                                     <td class="px-3 py-3 text-center border-r border-slate-200 font-medium">15 min.</td>
                                     <td id="cell-recursos-cierre" class="px-3 py-3 text-slate-600">---</td>
                                 </tr>
@@ -221,6 +220,6 @@
         </section>
     </main>
 
-    <script type="module" src="app.js"></script>
+    <script src="motor.js"></script>
 </body>
 </html>
