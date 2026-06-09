@@ -168,7 +168,7 @@ Devuelve los datos estructurados exactamente con estas llaves:
         
         // Configuramos el modelo blindando el formato de salida a JSON estricto
         const model = genAI.getGenerativeModel({ 
-            model: "gemini-1.5-flash",
+            model: "gemini-1.5-flash-latest",
             generationConfig: {
                 responseMimeType: "application/json",
             }
