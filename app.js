@@ -93,7 +93,7 @@ function actualizarTextoVerbos() {
     document.getElementById("verbos-sugeridos").innerText = "Verbos CC.SS: " + dbBloomLocal[bloomKey];
 }
 
-// CONTROL DE LA API KEY LOCAL (AHORA AUTOMÁTICO Y SILENCIOSO)
+// CONTROL DE LA API KEY LOCAL
 function guardarKey() {
     const key = document.getElementById("api-key-input").value.trim();
     if (key) {
@@ -129,7 +129,6 @@ function marcarEstadoKey(existe) {
 
 // PROCESAMIENTO CON LA IA Y LLENADO DE MATRICES
 async function ejecutarPlanificacionConIA() {
-    // UX FIX: Leemos la clave DIRECTAMENTE desde el cuadro de texto de la pantalla
     const apiKey = document.getElementById("api-key-input").value.trim();
     
     if (!apiKey) { 
@@ -138,7 +137,7 @@ async function ejecutarPlanificacionConIA() {
         return; 
     }
 
-    // AUTO-GUARDADO SILENCIOSO: La guardamos en el navegador para la próxima vez que abra la página
+    // Guardar llave automáticamente en segundo plano
     localStorage.setItem("key_modular_ccss", apiKey);
     marcarEstadoKey(true);
 
@@ -184,20 +183,24 @@ Debes responder ÚNICAMENTE con un objeto JSON plano, sin usar marcas markdown d
 - Complejidad Cognitiva Requerida: Nivel ${bloom}`;
 
     try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+        // CORRECCIÓN CLAVE: Usamos la URL v1 de producción global estable
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ contents: [{ parts: [{ text: promptFinal }] }] })
         });
 
+        // DETECTOR INTELIGENTE DE ERRORES DE GOOGLE
         if (!response.ok) {
-            throw new Error(`Google API devolvió un estado de error: ${response.status}`);
+            const errorBody = await response.json().catch(() => ({}));
+            const mensajeGoogle = errorBody.error?.message || "Error desconocido en el servidor de Google.";
+            throw new Error(`Google API (Status ${response.status}): ${mensajeGoogle}`);
         }
 
         const data = await response.json();
         
         if (!data.candidates || !data.candidates[0] || !data.candidates[0].content.parts[0].text) {
-            throw new Error("La IA no devolvió el formato esperado. Inténtalo de nuevo.");
+            throw new Error("La estructura de respuesta de la IA está vacía. Inténtalo de nuevo.");
         }
 
         let textoRespuesta = data.candidates[0].content.parts[0].text;
@@ -211,7 +214,7 @@ Debes responder ÚNICAMENTE con un objeto JSON plano, sin usar marcas markdown d
         document.getElementById("cell-capacidades").innerHTML = compData.capacidades.join("<br>");
         document.getElementById("cell-desempeno-precisado").innerText = respuestaIA.desempenoPrecisado;
         document.getElementById("cell-enfoque").innerText = enfData.nombre;
-        document.getElementById("cell-actitudes").innerText = respuestaIA.actitudes || enfData.valores_actitudes;
+        document.getElementById("cell-actitudes").innerText = enfData.valores_actitudes;
 
         document.getElementById("cell-estrategias-inicio").innerText = respuestaIA.estrategiasInicio;
         document.getElementById("cell-recursos-inicio").innerText = respuestaIA.recursosInicio;
@@ -230,7 +233,8 @@ Debes responder ÚNICAMENTE con un objeto JSON plano, sin usar marcas markdown d
 
     } catch (error) {
         console.error(error);
-        alert("Aviso de servicio: Los servidores de Google Gemini están experimentando alta demanda o la clave es incorrecta. Vuelve a presionar el botón en unos segundos.");
+        // Te mostrará exactamente qué le molesta a Google en un cuadro limpio
+        alert(`Aviso del Sistema:\n${error.message}`);
     } finally {
         document.getElementById("loading-overlay").classList.add("hidden");
         document.getElementById("loading-overlay").classList.remove("flex");
