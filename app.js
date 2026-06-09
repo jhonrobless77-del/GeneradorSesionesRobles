@@ -137,7 +137,7 @@ async function ejecutarPlanificacionConIA() {
         return; 
     }
 
-    // Guardar llave automáticamente en segundo plano
+    // Auto-guardado silencioso
     localStorage.setItem("key_modular_ccss", apiKey);
     marcarEstadoKey(true);
 
@@ -183,14 +183,13 @@ Debes responder ÚNICAMENTE con un objeto JSON plano, sin usar marcas markdown d
 - Complejidad Cognitiva Requerida: Nivel ${bloom}`;
 
     try {
-        // CORRECCIÓN CLAVE: Usamos la URL v1 de producción global estable
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+        // ENLACE CORREGIDO: v1beta + gemini-1.5-flash para máxima compatibilidad gratuita
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ contents: [{ parts: [{ text: promptFinal }] }] })
         });
 
-        // DETECTOR INTELIGENTE DE ERRORES DE GOOGLE
         if (!response.ok) {
             const errorBody = await response.json().catch(() => ({}));
             const mensajeGoogle = errorBody.error?.message || "Error desconocido en el servidor de Google.";
@@ -214,7 +213,7 @@ Debes responder ÚNICAMENTE con un objeto JSON plano, sin usar marcas markdown d
         document.getElementById("cell-capacidades").innerHTML = compData.capacidades.join("<br>");
         document.getElementById("cell-desempeno-precisado").innerText = respuestaIA.desempenoPrecisado;
         document.getElementById("cell-enfoque").innerText = enfData.nombre;
-        document.getElementById("cell-actitudes").innerText = enfData.valores_actitudes;
+        document.getElementById("cell-actitudes").innerText = respuestaIA.actitudes || enfData.valores_actitudes;
 
         document.getElementById("cell-estrategias-inicio").innerText = respuestaIA.estrategiasInicio;
         document.getElementById("cell-recursos-inicio").innerText = respuestaIA.recursosInicio;
@@ -233,7 +232,6 @@ Debes responder ÚNICAMENTE con un objeto JSON plano, sin usar marcas markdown d
 
     } catch (error) {
         console.error(error);
-        // Te mostrará exactamente qué le molesta a Google en un cuadro limpio
         alert(`Aviso del Sistema:\n${error.message}`);
     } finally {
         document.getElementById("loading-overlay").classList.add("hidden");
